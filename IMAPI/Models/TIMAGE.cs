@@ -12,7 +12,9 @@ namespace IMAPI.Models
         [Key]
         public int ID { get; set; }
         [Required]
-        public int PERSONID { get; set; }
+        public int ENTITYID { get; set; }
+        [Required]
+        public string ENTITYTYPE { get; set; }
         [Required]
         public string NAME { get; set; }
         [Required]

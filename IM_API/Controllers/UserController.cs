@@ -77,7 +77,7 @@ namespace IM_API.Controllers
             return Ok(JsonConvert.DeserializeObject<TUSER_V>(userString.Value));
         }
 
-        [HttpPost]
+        [HttpPut]
         [Authorize]
         public async Task<IActionResult> UpdateMe([FromBody] TUSERUPDATE Model)
         {
@@ -89,18 +89,7 @@ namespace IM_API.Controllers
                 if (user is null)
                     return BadRequest("INVALID_USER");
 
-                if (Model.USERNAME != null)
-                    user.USERNAME = Model.USERNAME;
-                if (Model.EMAIL != null)
-                    user.EMAIL = Model.EMAIL;
-                if (Model.FIRSTNAME != null)
-                    user.FIRSTNAME = Model.FIRSTNAME;
-                if (Model.LASTNAME != null)
-                    user.LASTNAME = Model.LASTNAME;
-                if (Model.BIRTHDATE != null)
-                    user.BIRTHDATE = Model.BIRTHDATE.Value;
-
-                ModelManager.FillDefaults(user);
+                ModelManager.CopyModel(user, Model);
                 await _DbContext.SaveChangesAsync();
 
                 return Ok();

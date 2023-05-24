@@ -33,7 +33,7 @@ namespace IM_API.Controllers
             foreach (var item in result)
                 resultList.Add(PersonManager.MakePersonView(item.PERSON, item.USER, item.USEROPTIONS));
 
-            return Ok(resultList);
+            return Ok(TRESPONSE.OK(resultList, resultList.Count == 0 ? "No person found" : string.Empty));
         }
 
         [HttpGet("Search")]
@@ -55,18 +55,14 @@ namespace IM_API.Controllers
             foreach (var item in result)
                 resultList.Add(PersonManager.MakePersonView(item.PERSON, item.USER, item.USEROPTIONS));
 
-            return Ok(resultList);
+            return Ok(TRESPONSE.OK(resultList, resultList.Count == 0 ? "No person found" : string.Empty));
         }
 
         [HttpGet("Image")]
         [Authorize]
         public async Task<IActionResult> GetPersonImage(int PersonId)
         {
-            var query = from i in _DbContext.Image
-                        where i.PERSONID == PersonId
-                        select i;
-
-            var result = await query.FirstOrDefaultAsync();
+            var result = await ModelManager.GetImage<TPERSON>(PersonId, _DbContext.Image);
             if(result is null)
                 return NotFound();
 
@@ -75,21 +71,30 @@ namespace IM_API.Controllers
 
         [HttpGet("Image/Anonym")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetAnonymImage(int PersonId, string IMToken, TDEVICE Device)
+        public async Task<IActionResult> GetAnonymImage(int PersonId, string IMToken, [FromQuery] TDEVICE Device)
         {
             TAUTH auth = await Authentication.Authenticate(_DbContext, IMToken, Device);
             if(!auth.IsOK())
                 return Unauthorized();
 
-            var query = from i in _DbContext.Image
-                        where i.PERSONID == PersonId
-                        select i;
-
-            var result = await query.FirstOrDefaultAsync();
+            var result = await ModelManager.GetImage<TPERSON>(PersonId, _DbContext.Image);
             if (result is null)
                 return NotFound();
 
             return File(result.DATA, "image/" + result.TYPE);
+        }
+
+        [HttpPost("Image")]
+        [Authorize]
+        public async Task<IActionResult> UploadPersonImage(int PersonId, IFormFile Image)
+        {
+            if(Image.ContentType != "image/jpeg" && Image.ContentType != "image/png")
+                return BadRequest("INVALID_IMAGE_TYPE");
+
+            await ModelManager.UploadImage<TPERSON>(PersonId, Image, _DbContext.Image);
+            await _DbContext.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }

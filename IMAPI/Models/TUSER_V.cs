@@ -1,4 +1,5 @@
-﻿using System;
+﻿using IMAPI.Attributes;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -17,6 +18,7 @@ namespace IMAPI.Models
     public class TUSER_V : TBASE
     {
         [Key]
+        [InitialOnly]
         public int ID { get; set; }
 
         [Required]

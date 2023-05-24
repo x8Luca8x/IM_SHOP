@@ -17,6 +17,11 @@
         public DbSet<TPERSON> Person { get; set; }
         public DbSet<TIMAGE> Image { get; set; }
 
+        public DbSet<TARTICLE> Article { get; set; }
+        public DbSet<TCATEGORY> Category { get; set; }
+
+        public DbSet<TCURRENCY> Currency { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TUSER>().HasIndex(u => u.USERNAME).IsUnique();
@@ -26,8 +31,6 @@
 
             modelBuilder.Entity<TPERSON>().HasIndex(p => p.USERID).IsUnique();
             modelBuilder.Entity<TUSEROPTIONS>().HasIndex(p => p.USERID).IsUnique();
-
-            modelBuilder.Entity<TIMAGE>().HasIndex(i => i.PERSONID).IsUnique();
         }
     }
 }
