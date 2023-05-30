@@ -15,6 +15,12 @@ namespace IM_API.Controllers
         public TCURRENCY CURRENCY { get; set; }
     }
 
+    public class ArticleInformation
+    {
+        public int ARTICLEID { get; set; }
+        public int NUMIMAGES { get; set; }
+    }
+
     [Route("api/[controller]")]
     [ApiController]
     public class ShopController : ControllerBase
@@ -54,7 +60,7 @@ namespace IM_API.Controllers
             }
 
             var result = await query.ToListAsync();
-            return Ok(TRESPONSE.OK(result, result.Count == 0 ? "No article found" : string.Empty));
+            return Ok(TRESPONSE.OK(result, result.Count == 0 ? LangManager.GetTranslationFromRequest("NO_ARTICLE_FOUND", Request) : string.Empty));
         }
 
         [HttpPost]
@@ -89,7 +95,7 @@ namespace IM_API.Controllers
         {
             int userId = 0;
             var claim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-            if(claim != null)
+            if (claim != null)
                 userId = int.Parse(claim.Value);
 
             string result = await ShopManager.ViewArticle(_DbContext, ArticleId, userId);
@@ -132,7 +138,7 @@ namespace IM_API.Controllers
             }
 
             if (indexes.Count == 0)
-                return Ok(TRESPONSE.OK(indexes, "No article found"));
+                return Ok(TRESPONSE.OK(indexes, LangManager.GetTranslationFromRequest("NO_ARTICLE_FOUND", Request)));
 
             var result = new ShopSearchResult[indexes.Count];
             for (int i = 0; i < indexes.Count; ++i)
@@ -172,12 +178,12 @@ namespace IM_API.Controllers
             return Ok(TRESPONSE.OK(result, result.Length == 0 ? "No article found" : string.Empty));
         }
 
-        [HttpGet("Suggestion")]
+        [HttpGet("Suggestions")]
         [Authorize]
         // @param BasedOn = 0: Based on user's interests (Purchases and views), 1: Based on user's purchases, 2: Based on user's views
         public async Task<IActionResult> GetSuggestions(int BasedOn = 0, int Limit = 25)
         {
-            if(Limit <= 0)
+            if (Limit <= 0)
                 return BadRequest(TRESPONSE.ERROR("Limit must be greater than 0"));
 
             var userString = User.Claims.FirstOrDefault(e => e.Type == ClaimTypes.UserData);
@@ -196,10 +202,11 @@ namespace IM_API.Controllers
                         join u in _DbContext.User on p.USERID equals u.ID
                         join uo in _DbContext.UserOptions on p.USERID equals uo.USERID
                         join c in _DbContext.Currency on a.CURRENCYID equals c.ID
+                        where a.QUANTITY > 0
                         select new { ARTICLE = a, PERSON = p, USER = u, USEROPTIONS = uo, CURRENCY = c };
 
             var queryResult = await query.ToListAsync();
-            HashSet<string> searchTags = new HashSet<string>();
+            Dictionary<string, int> searchTags = new Dictionary<string, int>();
 
             if (BasedOn == 0 || BasedOn == 1)
             {
@@ -212,10 +219,15 @@ namespace IM_API.Controllers
 
                     string[] tags = item.ARTICLE.TAGS.Split(',', StringSplitOptions.RemoveEmptyEntries);
                     for (int j = 0; j < tags.Length; ++j)
-                        searchTags.Add(tags[j]);
+                    {
+                        if (searchTags.ContainsKey(tags[j]))
+                            searchTags[tags[j]]++;
+                        else
+                            searchTags.Add(tags[j], 1);
+                    }
                 }
             }
-            
+
             if (BasedOn == 0 || BasedOn == 2)
             {
                 // Based on user's views
@@ -227,7 +239,12 @@ namespace IM_API.Controllers
 
                     string[] tags = item.ARTICLE.TAGS.Split(',', StringSplitOptions.RemoveEmptyEntries);
                     for (int j = 0; j < tags.Length; ++j)
-                        searchTags.Add(tags[j]);
+                    {
+                        if (searchTags.ContainsKey(tags[j]))
+                            searchTags[tags[j]]++;
+                        else
+                            searchTags.Add(tags[j], 1);
+                    }
                 }
             }
 
@@ -259,8 +276,8 @@ namespace IM_API.Controllers
 
                 for (int j = 0; j < tags.Length; ++j)
                 {
-                    if (searchTags.Contains(tags[j]))
-                        ++count;
+                    if (searchTags.TryGetValue(tags[j], out int val))
+                        count += val;
                 }
 
                 if (count > 0)
@@ -275,19 +292,28 @@ namespace IM_API.Controllers
             var sortedIndexes = indexes.OrderByDescending(a => a.Value);
 
             // Get the articles with the closest tags to the user's purchases and views
-            var result = new ShopSearchResult[Limit];
-            for (int i = 0; i < sortedIndexes.Count(); ++i)
+            var result = new ShopSearchResult[sortedIndexes.Count() < Limit ? sortedIndexes.Count() : Limit];
+            for (int i = 0; i < result.Length; ++i)
             {
                 var item = queryResult[sortedIndexes.ElementAt(i).Key];
                 var person = PersonManager.MakePersonView(item.PERSON, item.USER, item.USEROPTIONS);
 
                 result[i] = new ShopSearchResult { ARTICLE = item.ARTICLE, PERSON = person, CURRENCY = item.CURRENCY };
-
-                if (i == Limit - 1)
-                    break;
             }
 
             return Ok(TRESPONSE.OK(result));
+        }
+
+        [HttpGet("Info")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetArticleInfo(int ArticleId)
+        {
+            ArticleInformation info = new ArticleInformation();
+
+            info.ARTICLEID = ArticleId;
+            info.NUMIMAGES = _DbContext.Image.Count(e => e.ENTITYTYPE == "TARTICLE" && e.ENTITYID == ArticleId);
+
+            return Ok(TRESPONSE.OK(info));
         }
     }
 }

@@ -1,3 +1,4 @@
 {
-  "INVALID_LOGIN_DATA": "Ungültige Login-Daten"
+  "INVALID_LOGIN_DATA": "Ungültige Login-Daten",
+  "NO_ARTICLE_FOUND": "Es wurde kein Artikel gefunden"
 }

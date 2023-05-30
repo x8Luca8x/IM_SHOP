@@ -13,5 +13,6 @@
         public string INVALID_ARTICLE_QUANTITY { get; set; } = "Article quantity must be greather then 0";
         public string CART_NOT_FOUND { get; set; } = "The current user does not have a cart";
         public string CART_ARTICLE_NOT_FOUND { get; set; } = "The current user does not have this article in the cart";
+        public string NO_ARTICLE_FOUND { get; set; } = "No article found";
     }
 }
