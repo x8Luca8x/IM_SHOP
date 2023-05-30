@@ -3,6 +3,7 @@ using System;
 using IM_API;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IM_API.Migrations
 {
     [DbContext(typeof(IMDbContext))]
-    partial class IMDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230526123850_InitialCart")]
+    partial class InitialCart
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,10 +55,6 @@ namespace IM_API.Migrations
 
                     b.Property<int>("SUBCATEGORYID")
                         .HasColumnType("int");
-
-                    b.Property<string>("TAGS")
-                        .IsRequired()
-                        .HasColumnType("longtext");
 
                     b.Property<string>("TITLE")
                         .IsRequired()
@@ -266,9 +264,6 @@ namespace IM_API.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("INDEX")
-                        .HasColumnType("int");
-
                     b.Property<string>("NAME")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -343,14 +338,6 @@ namespace IM_API.Migrations
                         .HasColumnType("varchar(50)");
 
                     b.Property<string>("PASSWORD")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("RECENT_PURCHASED_ARTICLES")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("RECENT_VIEWD_ARTICLES")
                         .IsRequired()
                         .HasColumnType("longtext");
 

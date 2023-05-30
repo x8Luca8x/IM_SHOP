@@ -2,6 +2,7 @@
 using IM_API.Security;
 using IMAPI;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -34,13 +35,13 @@ namespace IM_API.Controllers
             var tokenMatch = Regex.Match(result, IMAuthenticationDefaults.IToken);
 
             if (tokenMatch.Success)
-                return Ok(new { token = tokenMatch.Groups["token"].Value });
+                return Ok(new { TOKEN = tokenMatch.Groups["token"].Value });
             else
             {
                 if (result == "INVALID_LOGIN_DATA")
-                    return NotFound(result);
+                    return NotFound(LangManager.GetTranslationFromRequest(result, Request));
                 else
-                    return BadRequest(result);
+                    return BadRequest(LangManager.GetTranslationFromRequest(result, Request));
             }
         }
 
@@ -50,9 +51,9 @@ namespace IM_API.Controllers
         {
             string result = await Authentication.Register(_DbContext, Model);
             if (result == "OK")
-                return Ok(result);
+                return Ok();
             else
-                return BadRequest(result);
+                return BadRequest(LangManager.GetTranslationFromRequest(result, Request));
         }
 
         [HttpPost("Authenticate")]
@@ -71,8 +72,8 @@ namespace IM_API.Controllers
         public async Task<IActionResult> GetMe()
         {
             var userString = User.Claims.FirstOrDefault(e => e.Type == ClaimTypes.UserData);
-            if (userString is null)
-                return BadRequest("INVALID_USER");
+            if (userString is null)      
+                return BadRequest(LangManager.GetTranslationFromRequest("INVALID_USER", Request));
 
             return Ok(JsonConvert.DeserializeObject<TUSER_V>(userString.Value));
         }
@@ -87,7 +88,7 @@ namespace IM_API.Controllers
                 TUSER? user = await _DbContext.User.FirstOrDefaultAsync(e => e.ID == currentUserId);
 
                 if (user is null)
-                    return BadRequest("INVALID_USER");
+                    return BadRequest(LangManager.GetTranslationFromRequest("INVALID_USER", Request));
 
                 ModelManager.CopyModel(user, Model);
                 await _DbContext.SaveChangesAsync();
@@ -96,7 +97,7 @@ namespace IM_API.Controllers
             }
             catch (Exception)
             {
-                return BadRequest("UNKOWN_ERROR");
+                return BadRequest(LangManager.GetTranslationFromRequest("UNKOWN_ERROR", Request));
             }
         }
     }

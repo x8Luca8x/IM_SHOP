@@ -3,6 +3,7 @@ using System;
 using IM_API;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IM_API.Migrations
 {
     [DbContext(typeof(IMDbContext))]
-    partial class IMDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230525174740_UpdatedArticle_1")]
+    partial class UpdatedArticle_1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,10 +56,6 @@ namespace IM_API.Migrations
                     b.Property<int>("SUBCATEGORYID")
                         .HasColumnType("int");
 
-                    b.Property<string>("TAGS")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("TITLE")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -68,55 +66,6 @@ namespace IM_API.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Article");
-                });
-
-            modelBuilder.Entity("IM_API.Models.TCART", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CHANGED")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("CREATED")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("USERID")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("USERID")
-                        .IsUnique();
-
-                    b.ToTable("Cart");
-                });
-
-            modelBuilder.Entity("IM_API.Models.TCARTARTICLE", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("ARTICLEID")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CARTID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CHANGED")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<DateTime>("CREATED")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("QUANTITY")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("CartArticle");
                 });
 
             modelBuilder.Entity("IM_API.Models.TCATEGORY", b =>
@@ -266,9 +215,6 @@ namespace IM_API.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("INDEX")
-                        .HasColumnType("int");
-
                     b.Property<string>("NAME")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -343,14 +289,6 @@ namespace IM_API.Migrations
                         .HasColumnType("varchar(50)");
 
                     b.Property<string>("PASSWORD")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("RECENT_PURCHASED_ARTICLES")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("RECENT_VIEWD_ARTICLES")
                         .IsRequired()
                         .HasColumnType("longtext");
 

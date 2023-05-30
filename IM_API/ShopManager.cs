@@ -4,6 +4,8 @@ namespace IM_API
 {
     public static class ShopManager
     {
+        public const int MAX_USER_ARTICLE_VIEWS = 20;
+
         public static async Task<string> CreateArticle(IMDbContext DbContext, TARTICLE Model)
         {
             try
@@ -54,12 +56,11 @@ namespace IM_API
         public static async Task<string> UpdateArticle(IMDbContext DbContext, TARTICLE Model, int UserId)
         {
             // Get person from user id
-            var person = await DbContext.Person.FirstOrDefaultAsync(p => p.USERID == UserId);
+            var person = await DbContext.Person.FirstOrDefaultAsync(p => p.ID == Model.PERSONID);
             if (person == null)
                 return "Person not found";
 
-            // Create article
-            if(Model.PERSONID != person.ID)
+            if(person.USERID != UserId)
                 return "Article does not belong to this user";
 
             return await UpdateArticle(DbContext, Model);
@@ -74,6 +75,22 @@ namespace IM_API
                     return "Article not found";
 
                 article.VIEWS++;
+                if(UserId != 0)
+                {
+                    var user = await DbContext.User.FirstOrDefaultAsync(u => u.ID == UserId);
+                    if (user is not null)
+                    {
+                        var list = user.RECENT_VIEWD_ARTICLES.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+                        list.Add(article.ID.ToString());
+
+                        if (list.Count > MAX_USER_ARTICLE_VIEWS)
+                            list.RemoveAt(0);
+
+                        user.RECENT_VIEWD_ARTICLES = string.Join(',', list);
+                        DbContext.User.Update(user);
+                    }
+                }
+
                 await DbContext.SaveChangesAsync();
 
                 return "OK";

@@ -28,5 +28,7 @@ namespace IM_API.Models
         public int QUANTITY { get; set; }
         [Required]
         public int VIEWS { get; set; }
+        [Required]
+        public string TAGS { get; set; }
     }
 }

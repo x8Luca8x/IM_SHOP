@@ -19,9 +19,9 @@ namespace IMAPI
         public static void FillDefaults(TBASE Model, bool bCreated = false)
         {
             if(bCreated)
-                Model.CREATED = DateTime.Now;
+                Model.CREATED = DateTime.UtcNow;
 
-            Model.CHANGED = DateTime.Now;
+            Model.CHANGED = DateTime.UtcNow;
         }
 
         public static void CopyModel<T1, T2>(T1 Dest, T2 Source, bool bCreated = false, bool bFillDefaults = true) where T1 : TBASE
@@ -39,7 +39,7 @@ namespace IMAPI
                     continue;
 
                 var sourceProp = Source.GetType().GetProperty(property.Name);
-                if (sourceProp is null || sourceProp.GetType() != property.GetType())
+                if (sourceProp is null || sourceProp.PropertyType != property.PropertyType)
                     continue;
 
                 var value = sourceProp.GetValue(Source);

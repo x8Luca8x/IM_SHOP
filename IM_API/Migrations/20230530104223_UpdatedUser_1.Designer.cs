@@ -3,6 +3,7 @@ using System;
 using IM_API;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IM_API.Migrations
 {
     [DbContext(typeof(IMDbContext))]
-    partial class IMDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230530104223_UpdatedUser_1")]
+    partial class UpdatedUser_1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -22,6 +22,9 @@
 
         public DbSet<TCURRENCY> Currency { get; set; }
 
+        public DbSet<TCART> Cart { get; set; }
+        public DbSet<TCARTARTICLE> CartArticle { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TUSER>().HasIndex(u => u.USERNAME).IsUnique();
@@ -31,6 +34,8 @@
 
             modelBuilder.Entity<TPERSON>().HasIndex(p => p.USERID).IsUnique();
             modelBuilder.Entity<TUSEROPTIONS>().HasIndex(p => p.USERID).IsUnique();
+
+            modelBuilder.Entity<TCART>().HasIndex(c => c.USERID).IsUnique();
         }
     }
 }

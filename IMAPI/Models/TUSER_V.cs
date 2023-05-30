@@ -51,5 +51,10 @@ namespace IMAPI.Models
 
         [Required]
         public DateTime BIRTHDATE { get; set; }
+
+        // Recent viewed articles
+        public string RECENT_VIEWD_ARTICLES { get; set; } = string.Empty;
+        // Recent purchased articles
+        public string RECENT_PURCHASED_ARTICLES { get; set; } = string.Empty;
     }
 }

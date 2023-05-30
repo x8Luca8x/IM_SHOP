@@ -26,7 +26,7 @@ namespace IM_API.Auth
                 return new TAUTH(null, EAuthResult.NOT_VERIFIED_USER);
             else if (!result.USER.ACTIVE)
                 return new TAUTH(null, EAuthResult.INACTIVE_USER);
-            else if (result.TOKEN.CAN_EXPIRE && result.TOKEN.EXPIRES < DateTime.Now)
+            else if (result.TOKEN.CAN_EXPIRE && result.TOKEN.EXPIRES < DateTime.UtcNow)
                 return new TAUTH(null, EAuthResult.TOKEN_EXPIRED);
 
             return new TAUTH(result.USER, EAuthResult.OK);
@@ -87,7 +87,7 @@ namespace IM_API.Auth
         public static async Task<string> Register(IMDbContext DbContext, TREGISTER Model)
         {
             if (Model.PASSWORD != Model.PASSWORD_CONFIRM)
-                return "PASSWORDS_DO_NOT_MATCH";
+                return "PASSWORDS_NOT_MATCH";
 
             var query = from u in DbContext.User
                         where u.USERNAME == Model.USERNAME || u.EMAIL == Model.EMAIL
@@ -102,7 +102,7 @@ namespace IM_API.Auth
                     return "EMAIL_ALREADY_EXISTS";
             }
 
-            var user = new TUSER()
+            var user = new TUSER
             {
                 USERNAME = Model.USERNAME,
                 EMAIL = Model.EMAIL,

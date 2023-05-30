@@ -3,6 +3,7 @@ using IMAPI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace IM_API.Controllers
 {
@@ -18,7 +19,7 @@ namespace IM_API.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> GetPerson(int PersonId = 0)
         {
             var query = from p in _DbContext.Person
@@ -36,8 +37,25 @@ namespace IM_API.Controllers
             return Ok(TRESPONSE.OK(resultList, resultList.Count == 0 ? "No person found" : string.Empty));
         }
 
-        [HttpGet("Search")]
+        [HttpGet("Me")]
         [Authorize]
+        public async Task<IActionResult> GeMe()
+        {
+            int currentUserId = int.Parse(User.Claims.First(e => e.Type == ClaimTypes.NameIdentifier).Value);
+            var query = from p in _DbContext.Person
+                        where p.USERID == currentUserId
+                        join u in _DbContext.User on p.USERID equals u.ID
+                        select new { PERSON = p, USER = u as TUSER_V };
+
+            var result = query.FirstOrDefault();
+            if(result is null)
+                return NotFound();
+
+            return Ok(TRESPONSE.OK(PersonManager.MakePersonView(result.PERSON, result.USER, new TUSEROPTIONS{}, true)));
+        }
+
+        [HttpGet("Search")]
+        [AllowAnonymous]
         public async Task<IActionResult> SearchPerson(string SearchString)
         {
             var query = from p in _DbContext.Person
@@ -59,7 +77,7 @@ namespace IM_API.Controllers
         }
 
         [HttpGet("Image")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> GetPersonImage(int PersonId)
         {
             var result = await ModelManager.GetImage<TPERSON>(PersonId, _DbContext.Image);
@@ -86,15 +104,22 @@ namespace IM_API.Controllers
 
         [HttpPost("Image")]
         [Authorize]
-        public async Task<IActionResult> UploadPersonImage(int PersonId, IFormFile Image)
+        public async Task<IActionResult> UploadPersonImage(IFormFile Image)
         {
-            if(Image.ContentType != "image/jpeg" && Image.ContentType != "image/png")
-                return BadRequest("INVALID_IMAGE_TYPE");
+            int currentUserId = int.Parse(User.Claims.First(e => e.Type == ClaimTypes.NameIdentifier).Value);
+            var query = from p in _DbContext.Person
+                        where p.USERID == currentUserId
+                        select p;
 
-            await ModelManager.UploadImage<TPERSON>(PersonId, Image, _DbContext.Image);
+            var result = query.FirstOrDefault();
+            if (result is null)
+                return NotFound(TRESPONSE.ERROR("No person found"));
+
+            if(!await ModelManager.UploadImage<TPERSON>(result.ID, Image, _DbContext.Image))
+                return BadRequest(TRESPONSE.ERROR("Image upload failed"));
+
             await _DbContext.SaveChangesAsync();
-
-            return Ok();
+            return Ok(TRESPONSE.OK());
         }
     }
 }

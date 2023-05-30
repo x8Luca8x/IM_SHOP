@@ -19,6 +19,7 @@ namespace IMAPI.Models
         public string NAME { get; set; }
         [Required]
         public string TYPE { get; set; }
+        public int INDEX { get; set; } = 0;
         [Required]
         public byte[] DATA { get; set; }
     }
