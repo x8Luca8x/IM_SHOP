@@ -69,7 +69,7 @@ namespace IM_API.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> GetMe()
+        public IActionResult GetMe()
         {
             var userString = User.Claims.FirstOrDefault(e => e.Type == ClaimTypes.UserData);
             if (userString is null)      

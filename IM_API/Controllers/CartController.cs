@@ -29,7 +29,7 @@ namespace IM_API.Controllers
 
             var cart = await cartQuery.FirstOrDefaultAsync();
             if(cart is null)
-                return BadRequest(TRESPONSE.ERROR(LangManager.GetTranslationFromRequest("CART_NOT_FOUND", Request)));
+                return BadRequest(TRESPONSE.ERROR(Request, "CART_NOT_FOUND"));
 
             var cartArticlesQuery = from ca in _DbContext.CartArticle
                                     join a in _DbContext.Article on ca.ARTICLEID equals a.ID
@@ -38,7 +38,7 @@ namespace IM_API.Controllers
                                     select new { CARTARTICLE = ca, ARTICLE = a, CURRENCY = c };
 
             var cartArticles = await cartArticlesQuery.ToListAsync();
-            return Ok(TRESPONSE.OK(new { CART = cart, ARTICLES = cartArticles}));
+            return Ok(TRESPONSE.OK(Request, new { CART = cart, ARTICLES = cartArticles}));
         }
 
         [HttpPut]
@@ -46,7 +46,7 @@ namespace IM_API.Controllers
         public async Task<IActionResult> UpdateCart([FromBody] TCARTARTICLE cartArticle)
         {
             if(cartArticle.QUANTITY <= 0)
-                return BadRequest(TRESPONSE.ERROR(LangManager.GetTranslationFromRequest("INVALID_ARTICLE_QUANTITY", Request)));
+                return BadRequest(TRESPONSE.ERROR(Request, "INVALID_ARTICLE_QUANTITY"));
 
             int currentUserId = int.Parse(User.Claims.First(e => e.Type == ClaimTypes.NameIdentifier).Value);
             var cart = await _DbContext.Cart.FirstOrDefaultAsync(c => c.USERID == currentUserId);
@@ -81,7 +81,7 @@ namespace IM_API.Controllers
             }
 
             await _DbContext.SaveChangesAsync();
-            return Ok(TRESPONSE.OK());
+            return Ok(TRESPONSE.OK(Request));
         }
 
         [HttpDelete]
@@ -92,16 +92,16 @@ namespace IM_API.Controllers
             var cart = await _DbContext.Cart.FirstOrDefaultAsync(c => c.USERID == currentUserId);
 
             if (cart == null)
-                return BadRequest(TRESPONSE.ERROR(LangManager.GetTranslationFromRequest("CART_NOT_FOUND", Request)));
+                return BadRequest(TRESPONSE.ERROR(Request, "CART_NOT_FOUND"));
 
             var cartArticle = await _DbContext.CartArticle.FirstOrDefaultAsync(ca => ca.CARTID == cart.ID && ca.ARTICLEID == ArticleId);
             if (cartArticle == null)
-                return BadRequest(TRESPONSE.ERROR(LangManager.GetTranslationFromRequest("CART_ARTICLE_NOT_FOUND", Request)));
+                return BadRequest(TRESPONSE.ERROR(Request, "CART_ARTICLE_NOT_FOUND"));
 
             _DbContext.CartArticle.Remove(cartArticle);
             await _DbContext.SaveChangesAsync();
 
-            return Ok(TRESPONSE.OK());
+            return Ok(TRESPONSE.OK(Request));
         }
     }
 }

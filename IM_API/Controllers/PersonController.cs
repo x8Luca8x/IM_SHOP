@@ -34,7 +34,7 @@ namespace IM_API.Controllers
             foreach (var item in result)
                 resultList.Add(PersonManager.MakePersonView(item.PERSON, item.USER, item.USEROPTIONS));
 
-            return Ok(TRESPONSE.OK(resultList, resultList.Count == 0 ? "No person found" : string.Empty));
+            return Ok(TRESPONSE.OK(Request, resultList, resultList.Count == 0 ? "No person found" : string.Empty));
         }
 
         [HttpGet("Me")]
@@ -51,7 +51,7 @@ namespace IM_API.Controllers
             if(result is null)
                 return NotFound();
 
-            return Ok(TRESPONSE.OK(PersonManager.MakePersonView(result.PERSON, result.USER, new TUSEROPTIONS{}, true)));
+            return Ok(TRESPONSE.OK(Request, PersonManager.MakePersonView(result.PERSON, result.USER, new TUSEROPTIONS{}, true)));
         }
 
         [HttpGet("Search")]
@@ -73,7 +73,7 @@ namespace IM_API.Controllers
             foreach (var item in result)
                 resultList.Add(PersonManager.MakePersonView(item.PERSON, item.USER, item.USEROPTIONS));
 
-            return Ok(TRESPONSE.OK(resultList, resultList.Count == 0 ? "No person found" : string.Empty));
+            return Ok(TRESPONSE.OK(Request, resultList, resultList.Count == 0 ? "No person found" : string.Empty));
         }
 
         [HttpGet("Image")]
@@ -113,13 +113,13 @@ namespace IM_API.Controllers
 
             var result = query.FirstOrDefault();
             if (result is null)
-                return NotFound(TRESPONSE.ERROR("No person found"));
+                return NotFound(TRESPONSE.ERROR(Request, "No person found"));
 
             if(!await ModelManager.UploadImage<TPERSON>(result.ID, Image, _DbContext.Image))
-                return BadRequest(TRESPONSE.ERROR("Image upload failed"));
+                return BadRequest(TRESPONSE.ERROR(Request, "Image upload failed"));
 
             await _DbContext.SaveChangesAsync();
-            return Ok(TRESPONSE.OK());
+            return Ok(TRESPONSE.OK(Request));
         }
     }
 }

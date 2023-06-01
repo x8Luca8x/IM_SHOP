@@ -11,8 +11,6 @@ namespace IM_API.Models
         [Required]
         public int USERID { get; set; }
         [Required]
-        public DateTime CREATED { get; set; }
-        [Required]
         public bool CAN_EXPIRE { get; set; } = true;
         [Required]
         public DateTime EXPIRES { get; set; }
